@@ -1,0 +1,61 @@
+mixing length in main file:
+
+case 2 %Prandtl's Mixing Length model!
+% %             if(stepcount>=TurbStepCutoff) %Laminar used as initial condition!
+% %                 %Correct pressure of current iteration!
+% %                 %p = ppr + pn + 2/3*rho_fluid*TKELmix;
+% %                 
+% %                 %TRIAL - R.Pecnik's mixing length model
+% %                 p = ppr + pn;
+% %                 
+% %                 for i=2:N_xtot-1
+% %                     for j=2:N_ytot-1
+% %                         df = 1 - exp(-y_plus(i,j)/A_plus);
+% %                         t1 = (2*ydist(i,j)/R_geom - (ydist(i,j)/R_geom)^2)^2;
+% %                         t2 = (3-4*ydist(i,j)/R_geom + 2*(ydist(i,j)/R_geom)^2)^2;
+% %                         mueffDivMue = 0.5*(1+ 1/9*(k_vk^2)*((u_tau(i,j)*rho_fluid/...
+% %                             mu_MOL(i,j))^2)*(t1*t2)*(df^2))^(0.5) - 0.5;
+% %                         mu_EDDY(i,j) = mueffDivMue*mu_MOL(i,j);
+% %                     end
+% %                 end
+% %                 mu_EDDY(N_xtot,:) = mu_EDDY(N_xtot-1,:); 
+% %                 mu_EDDY(:,N_ytot) = 0; mu_EDDY(1,:) = 0; 
+% %                 mu_EDDY(:,1) = mu_EDDY(:,2);
+% %                 mu_fluid = mu_MOL + mu_EDDY;
+% %                 
+% % %                 %Obtain dynamic viscosity to be used for next iteration!
+% % %                 [mu_EDDY, mu_fluid, Lmix] = TurbulenceModelling.MLViscosityCalculator ...
+% % %                       (ConstEDDYviscosity, ChooseMLsolver, mu_MOL, xnodel, ynodel,...
+% % %                     N_xtot, N_ytot, R_geom, rho_fluid, y_plus,ydist,A_plus,k0,k_vk, dxblock, ...
+% % %                     dyblock, tau_w, jin, u, v, mu_EDDY);
+% % %                 
+% % %                 %Obtain TKE and k+ for mixing length. Used in next iteration!
+% % %                 [TKELmix, k_plusLmix, epsnext] = ...
+% % %                   TurbulenceModelling.TKELmixSolver(Lmix, jin, N_xtot, ...
+% % %                       N_ytot, tau_w, u_tau, dxblock, dyblock, u, v, kinlet);
+% % %                 TKE = TKELmix;
+% % 
+% %             else
+% %                 %Correct pressure of current iteration!
+% %                 p = ppr + pn;
+% %             end
+
+
+REGULAR MIXING LENGTH MODEL:
+
+
+            if(stepcount >= TurbStepCutoff && stepcount < (TurbStepCutoff + extrasteps))
+                %Correct pressure of current iteration!
+                p = p + 2/3*rho_fluid*TKELmix;
+                
+                %Obtain dynamic viscosity to be used for next iteration!
+                [mu_EDDY, mu_fluid, Lmix] = TurbulenceModelling.MLViscosityCalculator( ...
+                    ConstEDDYviscosity, ChooseMLsolver, mu_MOL, xnodel, ynodel,...
+                    N_xtot, N_ytot, R_geom, rho_fluid, y_plus,ydist,A_plus,k0,k_vk, dxblock, ...
+                    dyblock, tau_w, jin, u, v, mu_EDDY);
+                
+                %Obtain TKE and k+ for mixing length. Used in next iteration!
+                [TKELmix, k_plusLmix, epsnext] = TurbulenceModelling.TKELmixSolver(Lmix, jin, ...
+                    N_xtot, N_ytot, tau_w, u_tau, dxblock, dyblock, u, v, kinlet);
+                TKE = TKELmix;
+            else     

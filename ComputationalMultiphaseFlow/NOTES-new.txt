@@ -1,0 +1,2 @@
+operational axisymmetric swirl for single uniform inlet.
+next to be developed - rankine vortex inlet swirl.
